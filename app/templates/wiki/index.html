@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}База знаний — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📚 База знаний</h2>
+        
+        <div class="btn-group gap-1">
+            {% if current_user.get_editable_sections_list() %}
+            <a href="{{ url_for('wiki.create_article') }}" class="btn btn-success" style="border-radius: 0.375rem;">
+                <i class="bi bi-plus-circle"></i> Новая статья
+            </a>
+            {% endif %}
+            
+            {% if current_user.can_create_sections() %}
+            <a href="{{ url_for('admin.create_section') }}" class="btn btn-outline-primary" style="border-radius: 0.375rem;">
+                <i class="bi bi-folder-plus"></i> Новый раздел
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if sections_with_articles %}
+        <!-- Обёртка аккордеона -->
+        <div class="accordion" id="sectionsAccordion">
+        {% for section_data in sections_with_articles %}
+            <div class="accordion-item mb-3">
+                <!-- Заголовок (кликабельный) -->
+                <div class="accordion-header" id="heading-{{ section_data.section.id }}">
+                    <button class="accordion-button collapsed" type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#collapse-{{ section_data.section.id }}" 
+                            aria-expanded="false" 
+                            aria-controls="collapse-{{ section_data.section.id }}">
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h5 class="mb-0">{{ section_data.section.title }}</h5>
+                            <span class="badge bg-primary">{{ section_data.articles|length }} статей</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Тело раздела (свёрнуто по умолчанию) -->
+                <div id="collapse-{{ section_data.section.id }}" 
+                     class="accordion-collapse collapse" 
+                     aria-labelledby="heading-{{ section_data.section.id }}" 
+                     data-bs-parent="#sectionsAccordion">
+                    <div class="accordion-body p-0">
+                        <!-- Сохраняем твой card-body как есть -->
+                        <div class="card-body">
+                            {% if section_data.section.description %}
+                            <p class="text-muted mb-3">{{ section_data.section.description }}</p>
+                            {% endif %}
+                            
+                            <div class="list-group list-group-flush">
+                                {% for article in section_data.articles %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <a href="{{ url_for('wiki.view_article', article_id=article.id) }}" 
+                                               class="text-decoration-none">
+                                                {{ article.title }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">Обновлено: {{ article.updated_at.strftime('%d.%m.%Y') }}</small>
+                                    </div>
+                                    <div class="ms-2 me-1">
+                                        {% if article.can_user_edit(current_user) %}
+                                        <a href="{{ url_for('wiki.edit_article', article_id=article.id) }}" 
+                                           class="btn btn-outline-primary" title="Редактировать">
+                                            ✏️
+                                        </a>
+                                        <form action="{{ url_for('wiki.delete_article', article_id=article.id) }}" 
+                                              method="POST" 
+                                              class="d-inline"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить статью «{{ article.title }}»?')">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button type="submit" class="btn btn-outline-danger" title="Удалить">
+                                                🗑️
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div> <!-- /accordion -->
+
+    {% else %}
+        <div class="text-center py-5">
+            <h4 class="text-muted">😔 Пока нет статей</h4>
+            <p class="text-muted">Статьи появятся здесь, когда их добавят руководители или супервизоры</p>
+            
+            {% if current_user.get_editable_sections_list() %}
+            <a href="{{ url_for('wiki.create_article') }}" class="btn btn-primary btn-lg">
+                Создать первую статью
+            </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

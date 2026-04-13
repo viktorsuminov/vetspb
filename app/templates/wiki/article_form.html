@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">{{ title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="article-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label(class="form-label") }}
+                            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="Введите заголовок статьи") }}
+                            {% for error in form.title.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.sections.label(class="form-label") }}
+                            {{ form.sections(class="form-select" + (" is-invalid" if form.sections.errors else ""), size=5) }}
+                            {% for error in form.sections.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                Выберите разделы, к которым относится статья. 
+                                Можно выбрать несколько разделов, зажати Ctrl (Cmd на Mac).
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.content.label(class="form-label") }}
+                            {{ form.content(id="content") }}
+                            {% for error in form.content.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            <div class="form-text">
+                                Используйте панель инструментов для форматирования текста и добавления изображений.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('wiki.wiki_index') }}" class="btn btn-secondary me-md-2">Отмена</a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+$(function () {
+    $('textarea[name="content"]').summernote({
+        height: 400,
+        lang: 'ru-RU',
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['block', ['blockquote']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture']],
+            ['view', ['codeview']]
+        ],
+        callbacks: {
+            onImageUpload: function (files) {
+                let data = new FormData();
+                data.append('file', files[0]);
+                $.ajax({
+                    url: '{{ url_for("wiki.upload_file") }}',
+                    method: 'POST',
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    success: function (resp) {
+                        if (resp.url) {
+                            $('textarea[name="content"]').summernote('insertImage', resp.url);
+                        } else {
+                            alert('Ошибка: ' + (resp.error || 'Неизвестная ошибка'));
+                        }
+                    },
+                    error: function (xhr) {
+                        alert('Ошибка загрузки: ' + xhr.status + ' ' + xhr.statusText);
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Все статьи — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📄 Все статьи</h2>
+        <a href="{{ url_for('wiki.wiki_index') }}" class="btn btn-outline-secondary">
+            ← Назад к разделам
+        </a>
+    </div>
+
+    {% if articles %}
+    <div class="row">
+        {% for article in articles %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{{ url_for('wiki.view_article', article_id=article.id) }}" 
+                           class="text-decoration-none">
+                            {{ article.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted small">
+                        {{ article.get_content_preview(150) }}
+                    </p>
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                {% for section in article.sections %}
+                                <span class="badge bg-secondary">{{ section.title }}</span>
+                                {% endfor %}
+                            </small>
+                            
+                            {% if article.can_user_edit(current_user) %}
+                            <a href="{{ url_for('wiki.edit_article', article_id=article.id) }}" 
+                               class="btn btn-sm btn-outline-primary">✏️</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <h4 class="text-muted">😔 Статьи не найдены</h4>
+        <p class="text-muted">У вас нет доступа к статьям или статьи еще не созданы</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

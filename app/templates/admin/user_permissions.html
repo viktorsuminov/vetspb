@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Права доступа: {{ user.username }} — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">  <!-- Увеличим ширину -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">
+                        🔐 Права доступа: {{ user.username }}
+                        <span class="badge bg-secondary">{{ user.role.name }}</span>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        📝 {{ form.editable_sections.label }}
+                                    </label>
+                                    <small class="text-muted d-block mb-2">(может редактировать статьи в этих разделах)</small>
+                                    <div class="form-scrollable">
+                                        {% for section_id, section_title in form.editable_sections.choices %}
+                                        <div class="form-check hover-highlight">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="{{ form.editable_sections.name }}" 
+                                                   value="{{ section_id }}"
+                                                   id="edit_{{ section_id }}"
+                                                   {% if section_id in form.editable_sections.data %}checked{% endif %}>
+                                            <label class="form-check-label w-100" for="edit_{{ section_id }}">
+                                                {{ section_title }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% for error in form.editable_sections.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        👁️ {{ form.readable_sections.label }}
+                                    </label>
+                                    <small class="text-muted d-block mb-2">(может читать статьи в этих разделах)</small>
+                                    <div class="form-scrollable">
+                                        {% for section_id, section_title in form.readable_sections.choices %}
+                                        <div class="form-check hover-highlight">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="{{ form.readable_sections.name }}" 
+                                                   value="{{ section_id }}"
+                                                   id="read_{{ section_id }}"
+                                                   {% if section_id in form.readable_sections.data %}checked{% endif %}>
+                                            <label class="form-check-label w-100" for="read_{{ section_id }}">
+                                                {{ section_title }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% for error in form.readable_sections.errors %}
+                                        <div class="invalid-feedback d-block">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки выбора -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="checkAll('editable_sections')">
+                                    Выбрать все для редактирования
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="uncheckAll('editable_sections')">
+                                    Очистить все
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="checkAll('readable_sections')">
+                                    Выбрать все для чтения
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="uncheckAll('readable_sections')">
+                                    Очистить все
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>💡 Подсказка:</strong><br>
+                            • <strong>Руководители</strong> и <strong>Супервизоры</strong> имеют доступ ко всем разделам автоматически<br>
+                            • <strong>Старшие операторы</strong> могут читать все разделы, но редактировать только выбранные<br>
+                            • <strong>Операторы</strong> и <strong>Стажеры</strong> имеют доступ только к выбранным разделам
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('admin.user_management') }}" class="btn btn-secondary me-md-2">
+                                ← Назад к пользователям
+                            </a>
+                            {{ form.submit(class="btn btn-warning") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem 2rem;
+    background-color: #f8f9fa;
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.form-check:hover {
+    background-color: #e9ecef;
+}
+
+.hover-highlight:hover {
+    background-color: #e3f2fd;
+}
+
+.form-check-label {
+    cursor: pointer;
+    margin-left: 0.5rem;
+    word-break: break-word; /* Перенос длинных названий */
+}
+
+.form-check-input {
+    margin-left: 0;
+    margin-top: 0.2rem;
+}
+
+/* Стили для скроллбара */
+.form-scrollable::-webkit-scrollbar {
+    width: 8px;
+}
+
+.form-scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.form-scrollable::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.form-scrollable::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
+
+<script>
+function checkAll(fieldName) {
+    const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = true;
+    });
+}
+
+function uncheckAll(fieldName) {
+    const checkboxes = document.querySelectorAll(`input[name="${fieldName}"]`);
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+}
+
+// Автоматическое заполнение на основе роли
+document.addEventListener('DOMContentLoaded', function() {
+    const role = "{{ user.role.name }}";
+    
+    // Для руководителей и супервизоров автоматически выбираем все разделы для редактирования
+    if (role === 'Руководитель' || role === 'Супервизор') {
+        checkAll('editable_sections');
+    }
+    
+    // Для руководителей, супервизоров и старших операторов - все для чтения
+    if (role === 'Руководитель' || role === 'Супервизор' || role === 'Старший оператор') {
+        checkAll('readable_sections');
+    }
+});
+</script>
+{% endblock %}

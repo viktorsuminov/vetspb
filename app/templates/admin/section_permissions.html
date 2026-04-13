@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Права доступа к разделу «{{ section.title }}» — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title mb-0">🔐 Права доступа: {{ section.title }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.editors.label(class="form-label") }}
+                                    {{ form.editors(class="form-select" + (" is-invalid" if form.editors.errors else ""), size=8) }}
+                                    {% for error in form.editors.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                    <div class="form-text">
+                                        Выберите пользователей, которые могут редактировать статьи в этом разделе.<br>
+                                        <strong>Руководители и Супервизоры</strong> имеют доступ ко всем разделам автоматически.
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.readers.label(class="form-label") }}
+                                    {{ form.readers(class="form-select" + (" is-invalid" if form.readers.errors else ""), size=8) }}
+                                    {% for error in form.readers.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                    <div class="form-text">
+                                        Выберите пользователей, которые могут читать статьи в этом разделе.<br>
+                                        <strong>Руководители, Супервизоры и Старшие операторы</strong> имеют доступ ко всем разделам автоматически.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-warning") }}
+                            <a href="{{ url_for('admin.section_management') }}" class="btn btn-secondary">Назад к списку разделов</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

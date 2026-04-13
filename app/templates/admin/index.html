@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Админ-панель — {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>⚙️ Админ-панель</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">👥 Пользователи</h5>
+                    <p class="card-text">Управление пользователями системы</p>
+                    <a href="{{ url_for('admin.user_management') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">📚 Разделы</h5>
+                    <p class="card-text">Управление разделами базы знаний</p>
+                    <a href="{{ url_for('admin.section_management') }}" class="btn btn-primary">Перейти</a>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

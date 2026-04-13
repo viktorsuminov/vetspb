@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">🐾 Добро пожаловать в ВетБазу Знаний!</h1>
+    <p class="lead">База знаний для ветеринарной клиники</p>
+    
+    {% if current_user.is_authenticated %}
+        <hr class="my-4">
+        <p>Вы вошли как <strong>{{ current_user.username }}</strong> ({{ current_user.role.name }})</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('wiki.wiki_index') }}">Перейти к базе знаний</a>
+    {% else %}
+        <hr class="my-4">
+        <p>Для доступа к базе знаний необходимо войти в систему</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">Войти в систему</a>
+    {% endif %}
+</div>
+{% endblock %}
